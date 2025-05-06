@@ -9,14 +9,36 @@ const calculateTax = false;
 const apiKey = process.env.STRIPE_SECRET_KEY
 const baseUrl = 'https://api.stripe.com/v1'
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2024-06-20',
-    appInfo: {
-        name: 'accept-a-payment',
-        version: '0.0.2',
-        url: `${process.env.DOMAIN}/plugins/stripe/webhook`
-    }
-})
+// const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
+//     apiVersion: '2024-06-20',
+//     appInfo: {
+//         name: 'accept-a-payment',
+//         version: '0.0.2',
+//         url: `${process.env.DOMAIN}/plugins/stripe/webhook`
+//     }
+// })
+
+const stripe = require('stripe')(apiKey, {
+  apiVersion: '2024-06-20'
+});
+
+const createWebhook = async () => {
+  const response = await stripe.webhookEndpoints.create({
+    enabled_events: [
+      'charge.refunded', 
+      'checkout.session.async_payment_failed', 
+      'checkout.session.async_payment_succeeded', 
+      'payment_intent.canceled', 
+      'payment_intent.payment_failed',
+      'payment_intent.succeeded',
+    ],
+    url: `${process.env.DOMAIN}/plugins/stripe/webhook-v2024-06-20`,
+    api_version: '2024-06-20',
+    description: 'Infigo 2024-06-20'
+  })
+  console.log(response)
+}
+
 
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
@@ -269,23 +291,30 @@ app.get('/success', async (req, res) => {
 //     }
 // }
 
-// (async () => {
-//     try {
-//         const productName = 'Tutorial video';
-//         const productType = 'service';
-//         const product = await createProduct(productName, productType);
-//         console.log('Product created: ', product);
+(async () => {
+    // try {
+    //     const productName = 'Tutorial video';
+    //     const productType = 'service';
+    //     const product = await createProduct(productName, productType);
+    //     console.log('Product created: ', product);
 
-//         const price = await addPriceToProduct(product.id, 1000, 'usd'); //10.00
-//         console.log(`Price added to product ${product.id}: `, price);
+    //     const price = await addPriceToProduct(product.id, 1000, 'usd'); //10.00
+    //     console.log(`Price added to product ${product.id}: `, price);
 
-//         const paymentLink = await createPaymentLink(price.id)
-//         console.log('Payment link: ', paymentLink)
+    //     const paymentLink = await createPaymentLink(price.id)
+    //     console.log('Payment link: ', paymentLink)
 
-//     } catch(err) {
-//         console.log('Error: ', err)
-//     }
-// })()
+    // } catch(err) {
+    //     console.log('Error: ', err)
+    // }
+    try {
+      createWebhook()
+    } catch(err) {
+      console.log('Error: ', err)
+    }
+})()
+
+
 
   
 app.listen(port, () =>
