@@ -9,15 +9,6 @@ const calculateTax = false;
 const apiKey = process.env.STRIPE_SECRET_KEY
 const baseUrl = 'https://api.stripe.com/v1'
 
-// const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
-//     apiVersion: '2024-06-20',
-//     appInfo: {
-//         name: 'accept-a-payment',
-//         version: '0.0.2',
-//         url: `${process.env.DOMAIN}/plugins/stripe/webhook`
-//     }
-// })
-
 const stripe = require('stripe')(apiKey, {
   apiVersion: '2024-06-20'
 });
